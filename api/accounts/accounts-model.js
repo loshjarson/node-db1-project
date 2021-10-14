@@ -24,10 +24,15 @@ const deleteById = id => {
   return deleted
 }
 
+const getByName = name => {
+  return db("accounts").where("name",name).first()
+}
+
 module.exports = {
   getAll,
   getById,
   create,
   updateById,
   deleteById,
+  getByName,
 }
