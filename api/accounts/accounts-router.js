@@ -2,32 +2,70 @@ const router = require('express').Router()
 const Accounts = require("./accounts-model")
 const mw = require("./accounts-middleware")
 
-router.get('/', (req, res, next) => {
-  Accounts.getAll()
-    .then(accounts => {
-      res.status(200).json(accounts)
+router.get('/', async (req, res, next) => {
+  try {
+    const data = await Accounts.getAll()
+    res.status(200).json(data)
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+        message: 'Error retrieving the account',
     })
-    .catch(error => {
-      console.log(error);
-      res.status(500).json({
-          message: 'Error retrieving the actions',
-      })
+  }
+})
+
+router.get('/:id', mw.checkAccountId, async (req, res, next) => {
+  try {
+    const data = await Accounts.getById(req.params.id)
+    res.status(200).json(data)
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+        message: 'Error retrieving the account',
     })
+  }
 })
 
-router.get('/:id',mw.checkAccountId, (req, res, next) => {
+router.post('/', mw.checkAccountPayload, mw.checkAccountNameUnique, async (req, res, next) => {
+  const newAccount = req.body;
+  newAccount.name = newAccount.name.trim()
+
+  try {
+    const data = await Accounts.create(newAccount)
+    res.status(201).json(data)
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+        message: 'Error creating the account',
+    })
+  }
 })
 
-router.post('/',mw.checkAccountPayload, mw.checkAccountNameUnique, (req, res, next) => {
-  // DO YOUR MAGIC
-})
+router.put('/:id', mw.checkAccountId, mw.checkAccountPayload, async (req, res, next) => {
+  const newAccount = req.body;
+  newAccount.name = newAccount.name.trim()
 
-router.put('/:id',mw.checkAccountId, (req, res, next) => {
-  // DO YOUR MAGIC
+  try {
+    const data = await Accounts.updateById(req.params.id,newAccount)
+    res.status(204).json(data)
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+        message: 'Error updating the account',
+    })
+  }
 });
 
-router.delete('/:id',mw.checkAccountId, (req, res, next) => {
-  // DO YOUR MAGIC
+router.delete('/:id', mw.checkAccountId, async (req, res, next) => {
+  try {
+    const data = await Accounts.deleteById(req.params.id)
+    res.status(204).json(data)
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+        message: 'Error deleting the account',
+    })
+  }
 })
 
 router.use((err, req, res, next) => { // eslint-disable-line
