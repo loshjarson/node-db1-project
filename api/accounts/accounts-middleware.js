@@ -1,14 +1,12 @@
 const Accounts = require("./accounts-model")
 
 
-exports.checkAccountPayload = (req, res, next) => {
+async function checkAccountPayload(req, res, next) {
   const {name, budget} = req.body
-  console.log(typeof req.body.budget)
-  if (budget === NaN) {
-    res.status(400).json({ message: "budget of account must be a number" })
-  } else if (!name || !budget) {
+  console.log(typeof budget)
+  if (name == undefined || budget == undefined) {
     res.status(400).json({ message: "name and budget are required" })
-  } else if (isNaN(budget)) {
+  } else if (typeof budget !== "number") {
     res.status(400).json({ message: "budget of account must be a number" })
   } else if (typeof name !== "string") {
     res.status(400).json({ message: "name of account must be a string" })
@@ -21,11 +19,10 @@ exports.checkAccountPayload = (req, res, next) => {
   }
 }
 
-exports.checkAccountNameUnique = (req, res, next) => {
+async function checkAccountNameUnique(req, res, next) {
   const { name } = req.body;
   try {
     const data = await Accounts.getByName(name)
-    console.log(data)
     if (data) {
       res.status(400).json({ message: "that name is taken" })
     } else {
@@ -33,13 +30,11 @@ exports.checkAccountNameUnique = (req, res, next) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-        message: 'Error retrieving the account',
-    })
+    res.status(500).json({message: 'Error retrieving the account'})
   }
 }
 
-exports.checkAccountId = (req, res, next) => {
+async function checkAccountId(req, res, next) {
   const { id } = req.params
   try {
     const data = await Accounts.getById(id)
